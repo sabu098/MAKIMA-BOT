@@ -16,16 +16,12 @@
   "prefix": "+",
   "adminOnly": true,
   "adminBot": [
-    "100086142037942",
-    "100078140834638",
-    "61556006709662",
-    "61569162849783"
+    "61566551318414"
   ],
   "whiteListMode": {
     "enable": true,
     "whiteListIds": [
-      "100086142037942",
-      "100058342072915"
+      "61566551318414"
     ],
     "notes": "if you enable this feature, only the ids in the whiteListIds list can use the bot"
   },
