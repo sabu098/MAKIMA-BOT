@@ -1,62 +1,102 @@
-const fs = require('fs');
-const moment = require('moment-timezone');
+const fs = require("fs").promises;
+const fssync = require("fs");
+const path = require("path");
+const axios = require("axios");
+const moment = require("moment-timezone");
 
 module.exports = {
   config: {
-    name: "info",
-    version: "1.0",
-    author: "A Dil",
-    countDown: 20,
-    role: 0,
-    shortDescription: { vi: "", en: "Show bot info" },
-    longDescription: { vi: "", en: "Show bot info. Show bot details" },
+    name: "owner",
+    version: "1.2",
+    author: "Raihan | Azad 💥",
     category: "owner",
-    guide: { en: "+info" },
-    envConfig: {}
+    guide: {
+      en: "Use !owner Admin to view owner info."
+    }
   },
-  onStart: async function ({ message, event, usersData }) {
-    const botName = "⋆˚🦋ʸᵒᵘʳ𝙼𝚊𝚔𝚒𝚖𝚊🎀🍓⋆˚";
-    const botPrefix = "+";
-    const authorName = "A Dil";
-    const ownAge = "15";
-    const teamName = "Github team";
-    const authorFB = "https://www.facebook.com/a.dil.605376?mibextid=ZbWKwL";
-    const authorInsta = "https://www.instagram.com/a_dil2642/profilecard/?igsh=dmU5aW92eGh6MWxo";
-    const tikTok = "";
-    const urls = JSON.parse(fs.readFileSync('cliff.json'));
-    const link = urls[Math.floor(Math.random() * urls.length)];
-    const now = moment().tz('Asia/dhaka');
-    const date = now.format('MMMM Do YYYY');
-    const time = now.format('h:mm:ss A');
-    const uptime = process.uptime();
-    const seconds = Math.floor(uptime % 60);
-    const minutes = Math.floor((uptime / 60) % 60);
-    const hours = Math.floor((uptime / (60 * 60)) % 24);
-    const days = Math.floor(uptime / (60 * 60 * 24));
-    const uptimeString = `${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`;
-    var id1 = event.senderID;
-    var name1 = await usersData.getName(id1);
-    message.reply({
-      body: ` ➠${name1}
-	  《  📌𝐁𝐨𝐭 & 𝐎𝐰𝐧𝐞𝐫 𝐈𝐧𝐟𝐨 》
-\🌸𝑵𝒂𝒎𝒆: ${botName}
-\📎𝑩𝒐𝒕 𝑷𝒓𝒆𝒇𝒊𝒙: ${botPrefix}
-\👑𝑶𝒘𝒏𝒆𝒓: ${authorName}
-\👦🏻𝑨𝒈𝒆 : ${ownAge}
-\📱𝑭𝒂𝒄𝒆𝒃𝒐𝒐𝒌: ${authorFB}
-\🅾𝑰𝒏𝒔𝒕𝒂𝒈𝒓𝒂𝒎: ${authorInsta}
-// \🐔𝑻𝒊𝒌𝑻𝒐𝒌: ${tikTok} //for tik tok add
-\📅𝑫𝒂𝒕𝒆: ${date}
-\🕔𝑻𝒊𝒎𝒆: ${time}
-\🚀𝑻𝒆𝒂𝒎: ${teamName}
-\⌛𝑼𝒑𝒕𝒊𝒎𝒆: ${uptimeString}
-\===============`,
-      attachment: await global.utils.getStreamFromURL(link)
-    });
+
+  onStart: async function ({ api, event }) {
+    // Ensure only one owner message per thread
+    if (!this.sentThreads) this.sentThreads = {};
+    if (this.sentThreads[event.threadID]) return;
+    this.sentThreads[event.threadID] = true;
+
+    const ownerInfo = {  
+      name: "sabbir",  
+      gender: "𝙼𝚊𝚕𝚎",  
+      bio: " Dunno",  
+      nick: "sasuke",  
+      hobby: "Cricket/grouping/gaming",  
+      from: "Dinajpur",  
+      age: "18",  
+      status: "Student"  
+    };  
+
+    const sec = process.uptime();  
+    const botUptime = `${Math.floor(sec / 86400)}d ${Math.floor(sec % 86400 / 3600)}h ${Math.floor(sec % 3600 / 60)}m`;  
+    const now = moment().tz("Asia/Dhaka").format("h:mm A • dddd");  
+
+    const body = `
+
+🌸┌───────────────┐🌸
+𝗢𝗪𝗡𝗘𝗥 𝗜𝗡𝗙𝗢
+🌸└───────────────┘🌸
+
+✧ Name ➝ ${ownerInfo.name}
+✧ Gender ➝ ${ownerInfo.gender}
+✧ From ➝ ${ownerInfo.from}
+✧ Age ➝ ${ownerInfo.age}
+✧ Hobby ➝ ${ownerInfo.hobby}
+✧ Status ➝ ${ownerInfo.status}
+
+━━━━━━━━━━━━━━
+
+✦ Bot Name ➝ ${ownerInfo.bio}
+✦ Admin ➝ ${ownerInfo.nick}
+
+━━━━━━━━━━━━━━
+
+✨ Uptime ➝ ${botUptime}
+✨ Time ➝ ${now}
+
+📝 Any problem? Talk to admin.
+`;
+
+    // Image URL  
+    const imageUrl = "https://files.catbox.moe/rc5jr1.jpg";  
+    const imagePath = path.join(__dirname, "cache", "owner.jpg");  
+
+    try {  
+      // Download image  
+      const response = await axios.get(imageUrl, { responseType: "stream" });  
+      const writer = response.data.pipe(fssync.createWriteStream(imagePath));  
+      await new Promise((resolve, reject) => {  
+        writer.on("finish", resolve);  
+        writer.on("error", reject);  
+      });  
+
+      const msg = await api.sendMessage({  
+        body,  
+        attachment: fssync.createReadStream(imagePath)  
+      }, event.threadID);  
+
+      this.lastOwnerMsgID = msg.messageID;  
+      await fs.unlink(imagePath);  
+
+    } catch (e) {  
+      console.error("Error sending owner image:", e);  
+      const msg = await api.sendMessage(body, event.threadID);  
+      this.lastOwnerMsgID = msg.messageID;  
+    }
+
   },
-  onChat: async function ({ event, message, getLang }) {
-    if (event.body && event.body.toLowerCase() === "info") {
-      this.onStart({ message });
+
+  onChat: async function ({ api, event }) {
+    if (!event.body) return;
+    const msg = event.body.toLowerCase().trim();
+
+    if (msg === "!owner" || msg === "Osaragi admin") {  
+      await this.onStart({ api, event });  
     }
   }
 };
