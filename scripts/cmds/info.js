@@ -26,7 +26,7 @@ module.exports = {
       gender: "𝙼𝚊𝚕𝚎",  
       bio: " Dunno",  
       nick: "sasuke",  
-      hobby: "Cricket/grouping/gaming",  
+      hobby: "Cricket/football/gaming",  
       from: "Dinajpur",  
       age: "18",  
       status: "Student"  
